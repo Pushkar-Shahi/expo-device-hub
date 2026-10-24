@@ -188,7 +188,7 @@ describe("spawnEmulator", () => {
     try {
       await spawnEmulator(join(dir, "missing"), { name: "x", port: 5554 }, "win32");
       expect(spawnSpy).toHaveBeenCalledTimes(1);
-      const options = spawnSpy.mock.calls[0][2];
+      const options = spawnSpy.mock.calls[0]![2];
       expect(options).toEqual({
         detached: false,
         windowsHide: true,
@@ -204,7 +204,7 @@ describe("spawnEmulator", () => {
     try {
       await spawnEmulator(join(dir, "missing"), { name: "x", port: 5554 }, "darwin");
       expect(spawnSpy).toHaveBeenCalledTimes(1);
-      const options = spawnSpy.mock.calls[0][2];
+      const options = spawnSpy.mock.calls[0]![2];
       expect(options).toEqual({
         detached: true,
         windowsHide: true,
