@@ -52,19 +52,25 @@ export function formatEmulatorCommand(emulatorPath: string, options: BootDeviceO
 }
 
 /**
- * Spawn a detached, headless `emulator` process.
+ * Spawn a headless `emulator` process.
  *
- * The child is fully detached (its own process group, ignored stdio, `unref`ed)
- * so it keeps running after the parent exits. Resolves with the
- * {@link ChildProcess}, or `null` plus `error` if it could not be spawned.
+ * On POSIX systems, the child is spawned detached (its own process group,
+ * ignored stdio, `unref`ed) so it keeps running after the parent exits.
+ * On Windows, detached child processes unconditionally allocate a console
+ * window even when the emulator runs with `-no-window`; omitting `detached`
+ * while setting `windowsHide: true` keeps the boot headless and console-free.
+ * Resolves with the {@link ChildProcess}, or `null` plus `error` if it could
+ * not be spawned.
  */
 export function spawnEmulator(
   emulatorPath: string,
   options: BootDeviceOptions,
+  platform: NodeJS.Platform = process.platform,
 ): Promise<AndroidUtilsResult<ChildProcess | null>> {
   try {
     const child = spawn(emulatorPath, buildEmulatorArgs(options), {
-      detached: true,
+      detached: platform !== "win32",
+      windowsHide: true,
       stdio: "ignore",
     });
 

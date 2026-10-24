@@ -1,4 +1,5 @@
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
+import * as childProcess from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -180,5 +181,37 @@ describe("spawnEmulator", () => {
     const spawned = await spawnEmulator(join(dir, "missing"), { name: "x", port: 5554 });
     expect(spawned.value).toBeNull();
     expect(spawned.error?.message).toBe("[android-utils] Failed to spawn `emulator`:");
+  });
+
+  test("uses windowsHide and detached: false on Windows", async () => {
+    const spawnSpy = spyOn(childProcess, "spawn");
+    try {
+      await spawnEmulator(join(dir, "missing"), { name: "x", port: 5554 }, "win32");
+      expect(spawnSpy).toHaveBeenCalledTimes(1);
+      const options = spawnSpy.mock.calls[0][2];
+      expect(options).toEqual({
+        detached: false,
+        windowsHide: true,
+        stdio: "ignore",
+      });
+    } finally {
+      spawnSpy.mockRestore();
+    }
+  });
+
+  test("uses detached: true and windowsHide on non-Windows platforms", async () => {
+    const spawnSpy = spyOn(childProcess, "spawn");
+    try {
+      await spawnEmulator(join(dir, "missing"), { name: "x", port: 5554 }, "darwin");
+      expect(spawnSpy).toHaveBeenCalledTimes(1);
+      const options = spawnSpy.mock.calls[0][2];
+      expect(options).toEqual({
+        detached: true,
+        windowsHide: true,
+        stdio: "ignore",
+      });
+    } finally {
+      spawnSpy.mockRestore();
+    }
   });
 });

@@ -19,10 +19,11 @@ import type { BootDeviceOptions, BootedDevice, EmulatorExit } from "./types";
  */
 export async function bootDevice(
   options: BootDeviceOptions,
+  platform: NodeJS.Platform = process.platform,
 ): Promise<AndroidUtilsResult<BootedDevice | null>> {
   try {
-    const emulator = resolveEmulatorPath(process.env, homedir());
-    const spawned = await spawnEmulator(emulator, options);
+    const emulator = resolveEmulatorPath(process.env, homedir(), platform);
+    const spawned = await spawnEmulator(emulator, options, platform);
     if (spawned.error || !spawned.value) return result(null, spawned.error);
     const child = spawned.value;
 
