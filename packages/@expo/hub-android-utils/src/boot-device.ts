@@ -23,7 +23,7 @@ export async function bootDevice(
 ): Promise<AndroidUtilsResult<BootedDevice | null>> {
   try {
     const emulator = resolveEmulatorPath(process.env, homedir(), platform);
-    const spawned = await spawnEmulator(emulator, options, platform);
+    const spawned = await spawnEmulator(emulator, options);
     if (spawned.error || !spawned.value) return result(null, spawned.error);
     const child = spawned.value;
 
